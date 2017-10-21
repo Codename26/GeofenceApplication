@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">Geofence Application</string>
+    <string name="button_set_geofence">Set geofence</string>
+    <string name="button_set_geofence_">Set geofence for exit</string>
+    <string name="google_maps_key"
+            templateMergeStrategy="preserve"
+            translatable="false">AIzaSyATK23U7T1uRsB1yn--Jj3sLnv0yKhyTAw</string>
 </resources>
