@@ -1,9 +1,12 @@
 package com.codename26.geofenceapplication;
 
 import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.location.Criteria;
 import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -60,8 +63,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     private ArrayList<Marker> mMarkers;
     private boolean mLocationPermissionGranted;
     private Location mLastKnownLocation;
+    private LocationManager mLocationManager;
     private CameraPosition mCameraPosition;
     private BroadcastReceiver mBroadcastReceiver;
+    private Criteria mCriteria;
     private MyGeofence myGeofence;
 
 
@@ -83,6 +88,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         if (savedInstanceState != null) {
             mLastKnownLocation = savedInstanceState.getParcelable(MainActivity.KEY_LOCATION);
             mCameraPosition = savedInstanceState.getParcelable(MainActivity.KEY_CAMERA_POSITION);
+        }
+        Bundle arguments = getArguments();
+/*        if (arguments != null && arguments.containsKey(MainActivity.NEW_TASK_KEY)){
+            geoTask = arguments.getParcelable(MainActivity.NEW_TASK_KEY);
+        }*/
+        if (arguments != null && arguments.containsKey(MainActivity.TASK_ARRAY)){
+            mGeoTasks = (ArrayList<GeoTask>) arguments.getSerializable(MainActivity.TASK_ARRAY);
         }
 
     }
@@ -123,11 +135,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                                        public void onMapClick(LatLng latLng) {
                                            if (longClickPressed) {
                                                drawMap();
-                                              /* fab.setVisibility(View.GONE);
+                                              fab.setVisibility(View.GONE);
                                                if (mSnackbar.isShown()) {
                                                    mSnackbar.dismiss();
                                                }
-                                               longClickPressed = false;*/
+                                               longClickPressed = false;
                                            }
                                           /* mMenu.findItem(R.id.action_delete).setVisible(false);
                                            mMenu.findItem(R.id.action_edit).setVisible(false);*/
@@ -177,7 +189,24 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                             mGeoTasks.get(0).getTaskLongitude()), 15.5f) );
         } else if (mGeoTasks.size() < 1){
             //Move camera to current location
+            moveCameraToCurrentLocation();
         }
+    }
+
+    private void moveCameraToCurrentLocation() {
+            mLocationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+            mCriteria = new Criteria();
+            String bestProvider = String.valueOf(mLocationManager.getBestProvider(mCriteria, true));
+
+            @SuppressWarnings("MissingPermission") Location mLocation = mLocationManager.getLastKnownLocation(bestProvider);
+            if (mLocation != null) {
+                final double currentLatitude = mLocation.getLatitude();
+                final double currentLongitude = mLocation.getLongitude();
+                LatLng loc1 = new LatLng(currentLatitude, currentLongitude);
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(currentLatitude,
+                        currentLongitude), 15.5f), 2000, null );
+            }
+
     }
 
     @Override

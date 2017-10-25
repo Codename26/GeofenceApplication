@@ -7,9 +7,15 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+
 public class MainActivity extends AppCompatActivity {
     public static final String KEY_CAMERA_POSITION = "key_camera_position";
     public static final String KEY_LOCATION = "key_location";
+    public static final String TASK_ARRAY = "task_array";
+    private MapFragment mMapFragment;
+    private ArrayList<GeoTask> mGeoTasks = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,10 +30,9 @@ public class MainActivity extends AppCompatActivity {
                     .add(R.id.container, mPlaceholderFragment)
                     .commit();
         }*/
-        MapFragment mapFragment = new MapFragment();
-        mapFragment.setCreateTaskListener(mCreateTaskListener);
+       initMapFragment();
         getSupportFragmentManager().beginTransaction()
-                .add(R.id.container, mapFragment)
+                .add(R.id.container, mMapFragment)
                 .commit();
     }
 
@@ -55,4 +60,16 @@ public class MainActivity extends AppCompatActivity {
            startService(geofencingService);
        }
    };
+
+    private void initMapFragment(){
+        mMapFragment = new MapFragment();
+        DataBaseHelper helper = new DataBaseHelper(this);
+        mGeoTasks = helper.getTasks();
+        Bundle bundle = new Bundle();
+        bundle.putSerializable(TASK_ARRAY, (Serializable) mGeoTasks);
+        mMapFragment.setArguments(bundle);
+        //mMapFragment.setDeleteTaskListener(mDeleteTaskListener);
+        mMapFragment.setCreateTaskListener(mCreateTaskListener);
+        //mMapFragment.setEditTaskListener(mEditTaskListener);
+    }
 }

@@ -3,42 +3,57 @@ package com.codename26.geofenceapplication;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.google.android.gms.location.Geofence;
+
+import java.io.Serializable;
+
 /**
  * Created by Dell on 01.10.2017.
  */
 
-public class GeoTask implements Parcelable {
+public class GeoTask implements Serializable {
     public static final String TABLE_NAME = "Tasks";
     public static final String COLUMN_ID = "_id";
     public static final String COLUMN_TASK_NAME = "TaskName";
     public static final String COLUMN_TASK_DESCRIPTION = "TaskDescription";
     public static final String COLUMN_TASK_LATITUDE = "TaskLatitude";
     public static final String COLUMN_TASK_LONGITUDE = "TaskLongitude";
-    public static final String COLUMN_TASK_TAG = "TaskTag";
-    public static final String COLUMN_TASK_NOTIFICATION = "TaskNotification";
-
-
-
+    public static final String COLUMN_TASK_RADIUS = "TaskRadius";
+    private static final int ONE_MINUTE = 60000;
     private String mTaskName;
     private String mTaskDescription;
-    private String mTaskTag;
     private double mTaskLatitude;
     private double mTaskLongitude;
+    private float mTaskRadius;
     private long mTaskId;
-    private int mTaskNotification;
 
     public GeoTask() {
     }
 
-    public GeoTask(String taskName, double taskLatitude, double taskLongitude) {
+    public GeoTask(String taskName, double taskLatitude, double taskLongitude, float taskRadius) {
         mTaskName = taskName;
         mTaskLatitude = taskLatitude;
         mTaskLongitude = taskLongitude;
+        mTaskRadius = taskRadius;
     }
 
     public GeoTask(double taskLatitude, double taskLongitude) {
         mTaskLatitude = taskLatitude;
         mTaskLongitude = taskLongitude;
+    }
+
+    public String toString(){
+        return String.format("Name = %s, Desc = %s, Latitude = %f, Longitude = %f",
+                mTaskName, mTaskDescription, mTaskLatitude, mTaskLongitude);
+    }
+
+    public Geofence taskToGeofence(){
+        return new Geofence.Builder()
+                .setRequestId(String.valueOf(mTaskId))
+                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)
+                .setCircularRegion(mTaskLatitude, mTaskLongitude, mTaskRadius)
+                .setExpirationDuration(ONE_MINUTE)
+                .build();
     }
 
     public String getTaskName() {
@@ -57,14 +72,6 @@ public class GeoTask implements Parcelable {
         mTaskDescription = taskDescription;
     }
 
-    public String getTaskTag() {
-        return mTaskTag;
-    }
-
-    public void setTaskTag(String taskTag) {
-        mTaskTag = taskTag;
-    }
-
     public double getTaskLatitude() {
         return mTaskLatitude;
     }
@@ -81,6 +88,14 @@ public class GeoTask implements Parcelable {
         mTaskLongitude = taskLongitude;
     }
 
+    public float getTaskRadius() {
+        return mTaskRadius;
+    }
+
+    public void setTaskRadius(float taskRadius) {
+        mTaskRadius = taskRadius;
+    }
+
     public long getTaskId() {
         return mTaskId;
     }
@@ -88,58 +103,6 @@ public class GeoTask implements Parcelable {
     public void setTaskId(long taskId) {
         mTaskId = taskId;
     }
-
-    public int getTaskNotification() {
-        return mTaskNotification;
-    }
-
-    public void setTaskNotification(int taskNotification) {
-        mTaskNotification = taskNotification;
-    }
-
-    public String toString(){
-        return String.format("Name = %s, Desc = %s, Latitude = %f, Longitude = %f",
-                mTaskName, mTaskDescription, mTaskLatitude, mTaskLongitude);
-    }
-
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(this.mTaskName);
-        dest.writeString(this.mTaskDescription);
-        dest.writeString(this.mTaskTag);
-        dest.writeDouble(this.mTaskLatitude);
-        dest.writeDouble(this.mTaskLongitude);
-        dest.writeLong(this.mTaskId);
-        dest.writeInt(this.mTaskNotification);
-    }
-
-    protected GeoTask(Parcel in) {
-        this.mTaskName = in.readString();
-        this.mTaskDescription = in.readString();
-        this.mTaskTag = in.readString();
-        this.mTaskLatitude = in.readDouble();
-        this.mTaskLongitude = in.readDouble();
-        this.mTaskId = in.readLong();
-        this.mTaskNotification = in.readInt();
-    }
-
-    public static final Creator<GeoTask> CREATOR = new Creator<GeoTask>() {
-        @Override
-        public GeoTask createFromParcel(Parcel source) {
-            return new GeoTask(source);
-        }
-
-        @Override
-        public GeoTask[] newArray(int size) {
-            return new GeoTask[size];
-        }
-    };
 }
 
 

@@ -19,8 +19,7 @@ public class DataBaseHelper extends SQLiteOpenHelper {
                 + com.codename26.geofenceapplication.GeoTask.COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + com.codename26.geofenceapplication.GeoTask.COLUMN_TASK_NAME + " TEXT NOT NULL,"
                 + com.codename26.geofenceapplication.GeoTask.COLUMN_TASK_DESCRIPTION + " TEXT,"
-                + com.codename26.geofenceapplication.GeoTask.COLUMN_TASK_TAG + " TEXT,"
-                + com.codename26.geofenceapplication.GeoTask.COLUMN_TASK_NOTIFICATION + " INTEGER,"
+                + com.codename26.geofenceapplication.GeoTask.COLUMN_TASK_RADIUS + " REAL,"
                 + com.codename26.geofenceapplication.GeoTask.COLUMN_TASK_LATITUDE + " REAL NOT NULL,"
                 + com.codename26.geofenceapplication.GeoTask.COLUMN_TASK_LONGITUDE + " REAL NOT NULL);");
 
@@ -36,8 +35,7 @@ public class DataBaseHelper extends SQLiteOpenHelper {
                 ContentValues values = new ContentValues();
                 values.put(com.codename26.geofenceapplication.GeoTask.COLUMN_TASK_NAME, "GeoTask " + i );
                 values.put(com.codename26.geofenceapplication.GeoTask.COLUMN_TASK_DESCRIPTION, "Desc " + i );
-                values.put(com.codename26.geofenceapplication.GeoTask.COLUMN_TASK_TAG, "Tag " + i );
-                values.put(com.codename26.geofenceapplication.GeoTask.COLUMN_TASK_NOTIFICATION, 0);
+                values.put(com.codename26.geofenceapplication.GeoTask.COLUMN_TASK_RADIUS, 200);
                 values.put(com.codename26.geofenceapplication.GeoTask.COLUMN_TASK_LATITUDE, latArray[i]);
                 values.put(com.codename26.geofenceapplication.GeoTask.COLUMN_TASK_LONGITUDE , lonArray[i]);
 
@@ -61,8 +59,7 @@ public class DataBaseHelper extends SQLiteOpenHelper {
             ContentValues values = new ContentValues();
             values.put(com.codename26.geofenceapplication.GeoTask.COLUMN_TASK_NAME, geoTask.getTaskName());
             values.put(com.codename26.geofenceapplication.GeoTask.COLUMN_TASK_DESCRIPTION, geoTask.getTaskDescription());
-            values.put(com.codename26.geofenceapplication.GeoTask.COLUMN_TASK_TAG, geoTask.getTaskTag());
-            values.put(com.codename26.geofenceapplication.GeoTask.COLUMN_TASK_NOTIFICATION, geoTask.getTaskNotification());
+            values.put(com.codename26.geofenceapplication.GeoTask.COLUMN_TASK_RADIUS, geoTask.getTaskRadius());
             values.put(com.codename26.geofenceapplication.GeoTask.COLUMN_TASK_LATITUDE, geoTask.getTaskLatitude());
             values.put(com.codename26.geofenceapplication.GeoTask.COLUMN_TASK_LONGITUDE , geoTask.getTaskLongitude());
 
@@ -83,8 +80,7 @@ public class DataBaseHelper extends SQLiteOpenHelper {
             ContentValues values = new ContentValues();
             values.put(com.codename26.geofenceapplication.GeoTask.COLUMN_TASK_NAME, geoTask.getTaskName());
             values.put(com.codename26.geofenceapplication.GeoTask.COLUMN_TASK_DESCRIPTION, geoTask.getTaskDescription());
-            values.put(com.codename26.geofenceapplication.GeoTask.COLUMN_TASK_TAG, geoTask.getTaskTag());
-            values.put(com.codename26.geofenceapplication.GeoTask.COLUMN_TASK_NOTIFICATION, geoTask.getTaskNotification());
+            values.put(com.codename26.geofenceapplication.GeoTask.COLUMN_TASK_RADIUS, geoTask.getTaskRadius());
             values.put(com.codename26.geofenceapplication.GeoTask.COLUMN_TASK_LATITUDE, geoTask.getTaskLatitude());
             values.put(com.codename26.geofenceapplication.GeoTask.COLUMN_TASK_LONGITUDE , geoTask.getTaskLongitude());
 
@@ -104,8 +100,7 @@ public class DataBaseHelper extends SQLiteOpenHelper {
             ContentValues values = new ContentValues();
             values.put(com.codename26.geofenceapplication.GeoTask.COLUMN_TASK_NAME, "");
             values.put(com.codename26.geofenceapplication.GeoTask.COLUMN_TASK_DESCRIPTION, "");
-            values.put(com.codename26.geofenceapplication.GeoTask.COLUMN_TASK_TAG, "");
-            values.put(com.codename26.geofenceapplication.GeoTask.COLUMN_TASK_NOTIFICATION, 0);
+            values.put(com.codename26.geofenceapplication.GeoTask.COLUMN_TASK_RADIUS, 200);
             values.put(com.codename26.geofenceapplication.GeoTask.COLUMN_TASK_LATITUDE, 0);
             values.put(com.codename26.geofenceapplication.GeoTask.COLUMN_TASK_LONGITUDE , 0);
 
@@ -131,8 +126,7 @@ public class DataBaseHelper extends SQLiteOpenHelper {
                     geoTask.setTaskId(cursor.getLong(cursor.getColumnIndex(com.codename26.geofenceapplication.GeoTask.COLUMN_ID)));
                     geoTask.setTaskName(cursor.getString(cursor.getColumnIndex(com.codename26.geofenceapplication.GeoTask.COLUMN_TASK_NAME)));
                     geoTask.setTaskDescription(cursor.getString(cursor.getColumnIndex(com.codename26.geofenceapplication.GeoTask.COLUMN_TASK_DESCRIPTION)));
-                    geoTask.setTaskTag(cursor.getString(cursor.getColumnIndex(com.codename26.geofenceapplication.GeoTask.COLUMN_TASK_TAG)));
-                    geoTask.setTaskNotification(cursor.getInt(cursor.getColumnIndex(com.codename26.geofenceapplication.GeoTask.COLUMN_TASK_NOTIFICATION)));
+                    geoTask.setTaskRadius(cursor.getFloat(cursor.getColumnIndex(GeoTask.COLUMN_TASK_RADIUS)));
                     geoTask.setTaskLatitude(cursor.getDouble(cursor.getColumnIndex(com.codename26.geofenceapplication.GeoTask.COLUMN_TASK_LATITUDE)));
                     geoTask.setTaskLongitude(cursor.getDouble(cursor.getColumnIndex(com.codename26.geofenceapplication.GeoTask.COLUMN_TASK_LONGITUDE)));
             }
@@ -163,8 +157,7 @@ public class DataBaseHelper extends SQLiteOpenHelper {
                     geoTask.setTaskId(cursor.getLong(cursor.getColumnIndex(com.codename26.geofenceapplication.GeoTask.COLUMN_ID)));
                     geoTask.setTaskName(cursor.getString(cursor.getColumnIndex(com.codename26.geofenceapplication.GeoTask.COLUMN_TASK_NAME)));
                     geoTask.setTaskDescription(cursor.getString(cursor.getColumnIndex(com.codename26.geofenceapplication.GeoTask.COLUMN_TASK_DESCRIPTION)));
-                    geoTask.setTaskTag(cursor.getString(cursor.getColumnIndex(com.codename26.geofenceapplication.GeoTask.COLUMN_TASK_TAG)));
-                    geoTask.setTaskNotification(cursor.getInt(cursor.getColumnIndex(com.codename26.geofenceapplication.GeoTask.COLUMN_TASK_NOTIFICATION)));
+                    geoTask.setTaskRadius(cursor.getFloat(cursor.getColumnIndex(GeoTask.COLUMN_TASK_RADIUS)));
                     geoTask.setTaskLatitude(cursor.getDouble(cursor.getColumnIndex(com.codename26.geofenceapplication.GeoTask.COLUMN_TASK_LATITUDE)));
                     geoTask.setTaskLongitude(cursor.getDouble(cursor.getColumnIndex(com.codename26.geofenceapplication.GeoTask.COLUMN_TASK_LONGITUDE)));
                     geoTasks.add(geoTask);
