@@ -1,5 +1,8 @@
 package com.codename26.geofenceapplication;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.android.gms.location.Geofence;
 
 import java.io.Serializable;
@@ -34,4 +37,7 @@ public class MyGeofence implements Serializable {
     public int getTransitionType() {
         return transitionType;
     }
+
+
+
 }

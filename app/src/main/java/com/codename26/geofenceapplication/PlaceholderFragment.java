@@ -33,9 +33,9 @@ public class PlaceholderFragment extends Fragment {
         mRadiusView = (EditText) rootView.findViewById(R.id.edit_radius);
 
         if (BuildConfig.DEBUG) {
-            mLatitudeView.setText("48.01478856");
-            mLongitudeView.setText("37.80279636");
-            mRadiusView.setText("150");
+            mLatitudeView.setText("50.515368");
+            mLongitudeView.setText("30.425291");
+            mRadiusView.setText("300");
         }
 
         Button enterButton = (Button) rootView.findViewById(R.id.set_geofence_enter);
@@ -44,7 +44,12 @@ public class PlaceholderFragment extends Fragment {
         enterButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendGeo(Geofence.GEOFENCE_TRANSITION_ENTER);
+                MyGeofence myGeofence = new MyGeofence(1, 50.515368, 30.425291, 300,Geofence.GEOFENCE_TRANSITION_ENTER);
+                if(mSendGeoListener != null){
+                    mSendGeoListener.sendGeoToService(myGeofence);
+                }
+
+               //sendGeo(Geofence.GEOFENCE_TRANSITION_ENTER);
             }
         });
         exitButton.setOnClickListener(new View.OnClickListener() {
@@ -75,5 +80,14 @@ public class PlaceholderFragment extends Fragment {
         activity.startService(geofencingService);
 
         mId++;
+    }
+
+    private SendGeoListener mSendGeoListener;
+
+    public void setSendGeoListener(SendGeoListener listener){
+        mSendGeoListener = listener;
+    }
+    public interface SendGeoListener{
+        void sendGeoToService(MyGeofence myGeofence);
     }
 }
