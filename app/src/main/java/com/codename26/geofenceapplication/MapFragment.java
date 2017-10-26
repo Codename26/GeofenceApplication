@@ -2,6 +2,7 @@ package com.codename26.geofenceapplication;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Criteria;
@@ -51,6 +52,7 @@ import java.util.HashMap;
 public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnMapLongClickListener,
         GoogleMap.OnMarkerClickListener {
     private final LatLng mDefaultLocation = new LatLng(50.450794, 30.448814);
+    private final float DEFAULT_RADIUS = 200;
     private GoogleMap mMap;
     private FloatingActionButton fab;
     private ArrayList<GeoTask> mGeoTasks = new ArrayList<>();
@@ -68,6 +70,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     private BroadcastReceiver mBroadcastReceiver;
     private Criteria mCriteria;
     private MyGeofence myGeofence;
+
 
 
     public MapFragment() {
@@ -111,11 +114,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
             @Override
             public void onClick(View v) {
                 if (mCreateTaskListener != null){
+                    Intent intent = new Intent(getActivity(), TaskEditActivity.class);
+                    intent.putExtra(MainActivity.NEW_TASK, newGeoTask);
+                    startActivityForResult(intent, MainActivity.NEW_TASK_REQUEST_CODE);
+                    //mCreateTaskListener.createTask(myGeofence);
 
-                    mCreateTaskListener.createTask(myGeofence);
-                    Toast.makeText(getContext(), "Task was added!", Toast.LENGTH_SHORT).show();
-                } else {
-                    System.out.println("mCreateTaskListener is empty");
                 }
 
             }
@@ -157,7 +160,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
 
     }
 
-    private void drawMap() {
+    public void drawMap() {
         mMarkers = new ArrayList<>();
         mMap.clear();
         for (int i = 0; i < mGeoTasks.size(); i++) {
@@ -220,8 +223,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                 .strokeColor(Color.argb(153, 117, 200, 242))
                 .fillColor(Color.argb(153, 117, 200, 242)));
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15.5f));
-        //newGeoTask = new GeoTask(latLng.latitude, latLng.longitude);
-        myGeofence = new MyGeofence(1, latLng.latitude, latLng.longitude, 300, Geofence.GEOFENCE_TRANSITION_ENTER);
+        newGeoTask = new GeoTask("", latLng.latitude, latLng.longitude, DEFAULT_RADIUS);
+       // myGeofence = new MyGeofence(1, latLng.latitude, latLng.longitude, 300, Geofence.GEOFENCE_TRANSITION_ENTER);
         fab.setVisibility(View.VISIBLE);
         Animation anim = AnimationUtils.loadAnimation(getActivity(), R.anim.appear);
         fab.setAnimation(anim);

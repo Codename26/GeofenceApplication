@@ -14,8 +14,13 @@ public class MainActivity extends AppCompatActivity {
     public static final String KEY_CAMERA_POSITION = "key_camera_position";
     public static final String KEY_LOCATION = "key_location";
     public static final String TASK_ARRAY = "task_array";
+    public static final String NEW_TASK = "new_task";
+    public static final String RETURNED_TASK = "returned_task";
+    public static final int NEW_TASK_REQUEST_CODE = 1;
     private MapFragment mMapFragment;
     private ArrayList<GeoTask> mGeoTasks = new ArrayList<>();
+    DataBaseHelper helper;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,10 +35,8 @@ public class MainActivity extends AppCompatActivity {
                     .add(R.id.container, mPlaceholderFragment)
                     .commit();
         }*/
+       helper = new DataBaseHelper(this);
        initMapFragment();
-        getSupportFragmentManager().beginTransaction()
-                .add(R.id.container, mMapFragment)
-                .commit();
     }
 
    private PlaceholderFragment.SendGeoListener mSendGeoListener = new PlaceholderFragment.SendGeoListener() {
@@ -63,13 +66,34 @@ public class MainActivity extends AppCompatActivity {
 
     private void initMapFragment(){
         mMapFragment = new MapFragment();
-        DataBaseHelper helper = new DataBaseHelper(this);
         mGeoTasks = helper.getTasks();
         Bundle bundle = new Bundle();
         bundle.putSerializable(TASK_ARRAY, (Serializable) mGeoTasks);
         mMapFragment.setArguments(bundle);
         //mMapFragment.setDeleteTaskListener(mDeleteTaskListener);
         mMapFragment.setCreateTaskListener(mCreateTaskListener);
+        getSupportFragmentManager().beginTransaction()
+                .add(R.id.container, mMapFragment)
+                .commit();
         //mMapFragment.setEditTaskListener(mEditTaskListener);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == RESULT_OK) {
+            GeoTask newGeoTask = (GeoTask) data.getSerializableExtra(RETURNED_TASK);
+            if(newGeoTask != null) {
+                helper.insertTask(newGeoTask);
+            }
+            mMapFragment.drawMap();
+            //cleanMapFragment();
+            //initMapFragment();
+        }
+    }
+
+    private void cleanMapFragment() {
+        getSupportFragmentManager().beginTransaction()
+                .remove(mMapFragment)
+                .commit();
     }
 }

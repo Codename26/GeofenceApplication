@@ -22,8 +22,12 @@
               android:layout_height="wrap_content"
               android:clickable = "true"
               tools:context="com.codename26.geotask.MapsActivity"/>
-<android.support.design.widget.FloatingActionButton
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:id="@+id/fab"/>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|right"
+        android:layout_margin="8dp"
+        android:src="@drawable/ic_add_white_36dp"/>
 </android.support.design.widget.CoordinatorLayout>
