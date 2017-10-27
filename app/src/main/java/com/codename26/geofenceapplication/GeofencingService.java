@@ -25,10 +25,11 @@ public class GeofencingService extends Service implements GoogleApiClient.Connec
 		GoogleApiClient.OnConnectionFailedListener {
 
 	public static final String EXTRA_REQUEST_IDS = "requestId";
-	public static final String EXTRA_GEOFENCE = "geofence";
+	public static final String EXTRA_GEOTASK = "geotask";
 	public static final String EXTRA_ACTION = "action";
 
 	private List<Geofence> mGeofenceListsToAdd = new ArrayList<>();
+	private List<GeoTask> mGeoTaskListsToAdd = new ArrayList<>();
 	private GoogleApiClient mGoogleApiClient;
 	private Action mAction;
 	private int transitionType;
@@ -41,9 +42,10 @@ public class GeofencingService extends Service implements GoogleApiClient.Connec
 		mAction = (Action) intent.getSerializableExtra(EXTRA_ACTION);
 
 		if (mAction == Action.ADD) {
-			MyGeofence newGeofence = (MyGeofence) intent.getSerializableExtra(EXTRA_GEOFENCE);
-			transitionType = newGeofence.getTransitionType();
-			mGeofenceListsToAdd.add(newGeofence.toGeofence());
+			//MyGeofence newGeofence = (MyGeofence) intent.getSerializableExtra(EXTRA_GEOTASK);
+			GeoTask newGeoTask = (GeoTask) intent.getSerializableExtra(EXTRA_GEOTASK);
+			transitionType = Geofence.GEOFENCE_TRANSITION_ENTER;
+			mGeofenceListsToAdd.add(newGeoTask.taskToGeofence());
 		}
 
 		mGoogleApiClient = new GoogleApiClient.Builder(this).addApi(LocationServices.API)

@@ -75,7 +75,7 @@ public class PlaceholderFragment extends Fragment {
         Intent geofencingService = new Intent(activity, GeofencingService.class);
         geofencingService.setAction(String.valueOf(Math.random()));
         geofencingService.putExtra(GeofencingService.EXTRA_ACTION, GeofencingService.Action.ADD);
-        geofencingService.putExtra(GeofencingService.EXTRA_GEOFENCE, myGeofence);
+        geofencingService.putExtra(GeofencingService.EXTRA_GEOTASK, myGeofence);
 
         activity.startService(geofencingService);
 

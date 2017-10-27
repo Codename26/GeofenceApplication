@@ -9,11 +9,9 @@ import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
@@ -25,10 +23,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.Toast;
 
-import com.google.android.gms.location.Geofence;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -39,11 +34,12 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import static android.app.Activity.RESULT_OK;
+import static com.codename26.geofenceapplication.MainActivity.RETURNED_TASK;
 
 
 /**
@@ -70,6 +66,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     private BroadcastReceiver mBroadcastReceiver;
     private Criteria mCriteria;
     private MyGeofence myGeofence;
+    private DataBaseHelper helper;
+    private GeoTask markerGeoTask;
 
 
 
@@ -86,19 +84,18 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mGeoTasks = new ArrayList<>();
+        helper = new DataBaseHelper(getActivity());
         //allow fragment to handle different menu items than it's root Activity
         setHasOptionsMenu(true);
-        if (savedInstanceState != null) {
-            mLastKnownLocation = savedInstanceState.getParcelable(MainActivity.KEY_LOCATION);
-            mCameraPosition = savedInstanceState.getParcelable(MainActivity.KEY_CAMERA_POSITION);
-        }
         Bundle arguments = getArguments();
 /*        if (arguments != null && arguments.containsKey(MainActivity.NEW_TASK_KEY)){
             geoTask = arguments.getParcelable(MainActivity.NEW_TASK_KEY);
         }*/
-        if (arguments != null && arguments.containsKey(MainActivity.TASK_ARRAY)){
+/*        if (arguments != null && arguments.containsKey(MainActivity.TASK_ARRAY)){
             mGeoTasks = (ArrayList<GeoTask>) arguments.getSerializable(MainActivity.TASK_ARRAY);
-        }
+        }*/
+
 
     }
 
@@ -113,13 +110,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mCreateTaskListener != null){
                     Intent intent = new Intent(getActivity(), TaskEditActivity.class);
                     intent.putExtra(MainActivity.NEW_TASK, newGeoTask);
                     startActivityForResult(intent, MainActivity.NEW_TASK_REQUEST_CODE);
                     //mCreateTaskListener.createTask(myGeofence);
 
-                }
 
             }
         });
@@ -144,8 +139,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                                                }
                                                longClickPressed = false;
                                            }
-                                          /* mMenu.findItem(R.id.action_delete).setVisible(false);
-                                           mMenu.findItem(R.id.action_edit).setVisible(false);*/
+                                           mMenu.findItem(R.id.action_delete).setVisible(false);
+                                           mMenu.findItem(R.id.action_edit).setVisible(false);
                                        }
                                    });
         // Turn on the My Location layer and the related control on the map.
@@ -161,6 +156,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     }
 
     public void drawMap() {
+        mGeoTasks = helper.getTasks();
         mMarkers = new ArrayList<>();
         mMap.clear();
         for (int i = 0; i < mGeoTasks.size(); i++) {
@@ -171,7 +167,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
             mMarkers.add(m);
             mMap.addCircle(new CircleOptions()
                     .center(new LatLng(geoTask.getTaskLatitude(), geoTask.getTaskLongitude()))
-                    .radius(200)
+                    .radius(Math.round(geoTask.getTaskRadius()))
                     .strokeWidth(2)
                     .strokeColor(Color.argb(153, 117, 200, 242))
                     .fillColor(Color.argb(153, 117, 200, 242)));
@@ -232,14 +228,31 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         mSnackbar.show();
         }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == RESULT_OK) {
+            GeoTask newGeoTask = (GeoTask) data.getSerializableExtra(RETURNED_TASK);
+            if(newGeoTask != null) {
+                if (newGeoTask.getTaskId() > 0){
+                    helper.updateTask(newGeoTask);
+                    drawMap();
+                    createTask(newGeoTask);
+                } else {
+                    new DataBaseHelper(getActivity()).insertTask(newGeoTask);
+                    drawMap();
+                    createTask(newGeoTask);
+                }
+            }
+        }
+    }
+
 
 
     @Override
     public boolean onMarkerClick(Marker marker) {
-       /* mMenu.findItem(R.id.action_delete).setVisible(true);
+        mMenu.findItem(R.id.action_delete).setVisible(true);
         mMenu.findItem(R.id.action_edit).setVisible(true);
-*/
-        geoTask = (GeoTask) marker.getTag();
+        markerGeoTask = (GeoTask) marker.getTag();
 
         return false;
     }
@@ -249,34 +262,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         mMenu = menu;
     }
 
-    private DeleteTaskListener mDeleteTaskListener;
-    private CreateTaskListener mCreateTaskListener;
-    private EditTaskListener mEditTaskListener;
-    public void setDeleteTaskListener(DeleteTaskListener listener){
-        mDeleteTaskListener = listener;
-    }
 
-    public void setCreateTaskListener(CreateTaskListener listener){
-        mCreateTaskListener = listener;
-    }
-
-    public void setEditTaskListener(EditTaskListener listener){
-        mEditTaskListener = listener;
-    }
-
-    public interface DeleteTaskListener{
-        void deleteGeoTask(long id);
-    }
-
-    public interface EditTaskListener{
-        void editTask(GeoTask geoTask);
-    }
-
-    public interface CreateTaskListener{
-        void createTask(MyGeofence myGeofence);
-    }
-
-    /*
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
@@ -285,24 +271,22 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         //noinspection SimplifiableIfStatement
 
         if (id == R.id.action_delete) {
-           if (mDeleteTaskListener != null){
-               mDeleteTaskListener.deleteGeoTask(geoTask.getTaskId());
-               mGeoTasks.remove(geoTask);
-               drawMap();
-           }
+            helper.deleteTask(markerGeoTask.getTaskId());
+            drawMap();
+            mMenu.findItem(R.id.action_delete).setVisible(false);
+            mMenu.findItem(R.id.action_edit).setVisible(false);
             return true;
         }
         if (id == R.id.action_edit) {
-
-            if(mEditTaskListener != null){
-                mEditTaskListener.editTask(geoTask);
-            }
+            Intent intent = new Intent(getActivity(), TaskEditActivity.class);
+            intent.putExtra(MainActivity.EDIT_TASK, markerGeoTask);
+            startActivityForResult(intent, MainActivity.EDIT_TASK_REQUEST_CODE);
 
             return true;
         }
 
         return super.onOptionsItemSelected(item);
-    }*/
+    }
 
 private boolean isLocationPermissionGranted(){
     return ContextCompat.checkSelfPermission(getActivity().getApplicationContext(),
@@ -329,15 +313,12 @@ private boolean isLocationPermissionGranted(){
         }
     }
 
-    /**
-     * Saves the state of the map when the activity is paused.
-     */
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        if (mMap != null) {
-            outState.putParcelable(MainActivity.KEY_CAMERA_POSITION, mMap.getCameraPosition());
-            outState.putParcelable(MainActivity.KEY_LOCATION, mLastKnownLocation);
-            super.onSaveInstanceState(outState);
-        }
+    private void createTask(GeoTask geoTask) {
+            Intent geofencingService = new Intent(getActivity(), GeofencingService.class);
+            geofencingService.setAction(String.valueOf(Math.random()));
+            geofencingService.putExtra(GeofencingService.EXTRA_ACTION, GeofencingService.Action.ADD);
+            geofencingService.putExtra(GeofencingService.EXTRA_GEOTASK, geoTask);
+            getActivity().startService(geofencingService);
+
     }
 }

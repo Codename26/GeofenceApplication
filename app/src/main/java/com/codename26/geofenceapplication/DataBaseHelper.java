@@ -23,7 +23,7 @@ public class DataBaseHelper extends SQLiteOpenHelper {
                 + com.codename26.geofenceapplication.GeoTask.COLUMN_TASK_LATITUDE + " REAL NOT NULL,"
                 + com.codename26.geofenceapplication.GeoTask.COLUMN_TASK_LONGITUDE + " REAL NOT NULL);");
 
-        fillDB(sqLiteDatabase);
+      //  fillDB(sqLiteDatabase);
 
     }
 
